@@ -10,12 +10,25 @@ timescaledb-single:
   persistentVolumes:
     data:
       size: 150Gi
+      storageClass: gp3
     wal:
-      size: 20Gi
+      size: 50Gi
+      storageClass: gp3
+  patroni:
+    bootstrap:
+      dcs:
+        postgresql:
+          parameters:
+            checkpoint_timeout: 15min
+            bgwriter_delay: 200ms
+            bgwriter_lru_maxpages: 0
+            bgwriter_lru_multiplier: 1
+            stats_temp_directory: /tmp/pg_stat_temp
+            # timescaledb.max_open_chunks_per_insert: 429
   resources:
     requests:
-      cpu: 100m
-      memory: 2Gi
+      cpu: "8"
+      memory: 32Gi
   tolerations:
   - key: "database"
     operator: "Exists"
@@ -57,8 +70,8 @@ promscale:
   connectionSecretName: "tobs-promscale-connection"
   resources:
     requests:
-      memory: 500Mi
-      cpu: 30m
+      memory: 16Gi
+      cpu: "4"
   config:
     # Use 1hr chunk interval for benchmarking. For details https://github.com/timescale/promscale/issues/1736
     startup.dataset.config: |
@@ -112,12 +125,14 @@ kube-prometheus-stack:
     tls:
       enabled: false
     admissionWebhooks:
-      enabled: false
+      enabled: true
   # This prometheus is monitoring the cluster. Do not use it for load generation.
   prometheus:
     prometheusSpec:
+      remoteWriteDashboards: true
       remoteRead: []
       remoteWrite: []
+      retention: 25d
       replicas: 1
       additionalScrapeConfigsSecret:
         enabled: false
@@ -148,6 +163,8 @@ kube-prometheus-stack:
               topologyKey: "kubernetes.io/hostname"
   grafana:
     enabled: true
+    service:
+      type: LoadBalancer
     env:
       GF_AUTH_ANONYMOUS_ENABLED: true
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Editor"
@@ -161,4 +178,4 @@ kube-prometheus-stack:
       datasource:
         enabled: false
 opentelemetry-operator:
-  enabled: true
+  enabled: false

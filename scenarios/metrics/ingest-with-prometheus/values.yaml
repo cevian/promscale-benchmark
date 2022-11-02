@@ -5,19 +5,19 @@ prometheus:
   - url: http://tobs-promscale.bench.svc:9201/write
     remoteTimeout: 100s
     # Configuration options in https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#queueconfig
-    queueConfig:
-      capacity: 100000
-      minShards: 20
-      maxShards: 20
-      maxSamplesPerSend: 10000
-      batchSendDeadline: 30s
-      minBackoff: 100ms
-      maxBackoff: 10s
+    # queueConfig:
+    #   capacity: 100000
+    #   minShards: 20
+    #   maxShards: 30
+    #   maxSamplesPerSend: 30000
+    #   batchSendDeadline: 30s
+    #   minBackoff: 100ms
+    #   maxBackoff: 2s
   retention: 2h
   resources:
     requests:
-      cpu: 40m
-      memory: 400Mi
+      cpu: 2
+      memory: 12Gi
 
 avalanche:
   enabled: true
@@ -27,7 +27,7 @@ avalanche:
     pullPolicy: Always
   # Use the following config to tweak the number of avalanche targets
   # to scrape instead of increasing replicaCount.
-  fakePrometheusTargetCount: 1
+  fakePrometheusTargetCount: 8
   extraArgs:
     - --series-interval=315360000
     - --metric-interval=315360000
@@ -49,3 +49,7 @@ avalanche:
     enabled: true
   serviceAccount:
     create: true
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
