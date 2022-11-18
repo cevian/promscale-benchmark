@@ -9,7 +9,7 @@ timescaledb-single:
     enabled: false
   persistentVolumes:
     data:
-      size: 150Gi
+      size: 1000Gi
       storageClass: gp3
     wal:
       size: 50Gi
@@ -20,19 +20,23 @@ timescaledb-single:
         postgresql:
           parameters:
             checkpoint_timeout: 15min
-            bgwriter_delay: 200ms
-            bgwriter_lru_maxpages: 0
-            bgwriter_lru_multiplier: 1
+            shared_buffers: 30GB
+            wal_compression: on
+            bgwriter_flush_after: 0
+            bgwriter_delay: 200
+            bgwriter_lru_maxpages: 100
+            bgwriter_lru_multiplier: 2
             stats_temp_directory: /tmp/pg_stat_temp
-            # timescaledb.max_open_chunks_per_insert: 429
   resources:
     requests:
-      cpu: "8"
-      memory: 32Gi
+      cpu: "15"
+      memory: 50Gi
   tolerations:
   - key: "database"
     operator: "Exists"
     effect: "NoSchedule"
+      cpu: "15"
+      memory: 50Gi
   affinityTemplate: |
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
