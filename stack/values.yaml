@@ -17,6 +17,9 @@ timescaledb-single:
     wal:
       size: 100Gi
       storageClass: gp3
+  prometheus:
+    args:
+      - --no-collector.database
   patroni:
     bootstrap:
       dcs:
@@ -29,9 +32,10 @@ timescaledb-single:
             bgwriter_delay: 200
             bgwriter_lru_maxpages: 100
             bgwriter_lru_multiplier: 2
-            stats_temp_directory: /tmp/pg_stat_temp
-  sharedMemory:
-    useMount: true
+            stats_temp_directory: /dev/shm/pg_stat_temp
+            #autovacuum_max_workers: 1
+            #max_wal_size: 85GB
+            #synchronous_commit: off
   resources:
     requests:
       cpu: "15"
@@ -40,8 +44,6 @@ timescaledb-single:
   - key: "database"
     operator: "Exists"
     effect: "NoSchedule"
-      cpu: "15"
-      memory: 50Gi
   affinityTemplate: |
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -68,9 +70,9 @@ promscale:
   enabled: true
   # If you want to use a different image, you can do so here.
   image:
-    repository: timescale/promscale
-  #   tag: 0.14.0
-    pullPolicy: IfNotPresent
+    repository: cevian/promscale
+    tag: john-vacuum
+    pullPolicy: Always
   extraArgs:
     - "--metrics.high-availability=false"
   extraEnv:
@@ -141,7 +143,7 @@ kube-prometheus-stack:
       remoteWriteDashboards: true
       remoteRead: []
       remoteWrite: []
-      retention: 25d
+      retention: 30d
       replicas: 1
       additionalScrapeConfigsSecret:
         enabled: false
