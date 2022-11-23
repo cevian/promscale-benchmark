@@ -136,7 +136,7 @@ kube-prometheus-stack:
     tls:
       enabled: false
     admissionWebhooks:
-      enabled: true
+      enabled: false
   # This prometheus is monitoring the cluster. Do not use it for load generation.
   prometheus:
     prometheusSpec:
