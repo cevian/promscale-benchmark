@@ -6,8 +6,10 @@ timescaledb-single:
   enabled: true
   replicaCount: 1
   image:
-    repository: antekresic/timescaledb-ha
-    tag: pg14-ts-main-24h-merge-chunks
+    #repository: antekresic/timescaledb-ha
+    repository: cevian/timescaledb-ha
+    #tag: pg14-ts-rel-2.9.0-fix
+    tag: ts2.9-prom3531b7
   backup:
     enabled: false
   persistentVolumes:
@@ -15,7 +17,7 @@ timescaledb-single:
       size: 1000Gi
       storageClass: gp3
     wal:
-      size: 100Gi
+      size: 200Gi
       storageClass: gp3
   prometheus:
     args:
@@ -33,9 +35,11 @@ timescaledb-single:
             bgwriter_lru_maxpages: 100
             bgwriter_lru_multiplier: 2
             stats_temp_directory: /dev/shm/pg_stat_temp
-            #autovacuum_max_workers: 1
-            #max_wal_size: 85GB
+            max_wal_size: 150GB
+            #maintenance_work_mem: 500MB
+            autovacuum_max_workers: 1
             #synchronous_commit: off
+            timescaledb.telemetry_level: "off"
   resources:
     requests:
       cpu: "15"
@@ -71,11 +75,12 @@ promscale:
   # If you want to use a different image, you can do so here.
   image:
     repository: cevian/promscale
-    tag: john-vacuum
+    tag: master-753ae
     pullPolicy: Always
   extraArgs:
     - "--metrics.high-availability=false"
-    - "--startup.upgrade-prerelease-extensions=true""
+    - "--startup.upgrade-prerelease-extensions=true"
+    - "--metrics.cache.series.initial-size=15000000"
   extraEnv:
     - name: PROMSCALE_TELEMETRY_TRACE_JAEGER_ENDPOINT
       value: http://jaeger-collector.tracing.svc.cluster.local:14268/api/traces
@@ -88,7 +93,7 @@ promscale:
     # Use 1hr chunk interval for benchmarking. For details https://github.com/timescale/promscale/issues/1736
     startup.dataset.config: |
       metrics:
-        default_chunk_interval: 1h
+        default_chunk_interval: 30m
   tolerations:
   - key: "connector"
     operator: "Exists"

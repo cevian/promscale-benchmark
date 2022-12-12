@@ -5,7 +5,7 @@ prometheus:
   - url: http://tobs-promscale.bench.svc:9201/write
     remoteTimeout: 100s
     queueConfig:
-      maxSamplesPerSend: 2000
+      maxSamplesPerSend: 6000
     # Configuration options in https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#queueconfig
     # queueConfig:
     #   capacity: 100000
@@ -15,11 +15,11 @@ prometheus:
     #   batchSendDeadline: 30s
     #   minBackoff: 100ms
     #   maxBackoff: 2s
-  retention: 2h
+  retention: 1h
   resources:
     requests:
-      cpu: 2
-      memory: 12Gi
+      cpu: 17
+      memory: 65Gi
 
 avalanche:
   enabled: true
@@ -29,7 +29,7 @@ avalanche:
     pullPolicy: Always
   # Use the following config to tweak the number of avalanche targets
   # to scrape instead of increasing replicaCount.
-  fakePrometheusTargetCount: 12
+  fakePrometheusTargetCount: 26
   extraArgs:
     - --series-interval=315360000
     - --metric-interval=315360000
@@ -42,7 +42,7 @@ avalanche:
     # replicaCount in avalanche values.
     - --metric-count=5000
     - --series-count=120
-    - --label-count=3
+    - --label-count=1
     - --value-interval=30
   labels:
     tobs/excluded: "true"
